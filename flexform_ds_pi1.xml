@@ -1,0 +1,31 @@
+<T3DataStructure>
+  	<sheets>
+		<sDEF>
+			<ROOT>	
+				<TCEforms>
+					<sheetTitle>LLL:EXT:ch_mandelbrot/locallang_db.php:tt_content.pi_flexform.sheet_general</sheetTitle>
+				</TCEforms>
+				<type>array</type>
+				<el>
+					<template_file>
+						<TCEforms>
+							<label>LLL:EXT:ch_mandelbrot/locallang_db.php:ch_mandelbrot.pi_flexform.template_file</label>
+							<config>
+								<type>group</type>
+								<internal_type>file</internal_type>
+								<allowed>tmpl,html,htm</allowed>
+								<max_size>100</max_size>
+								<uploadfolder>uploads/tx_chmandelbrot</uploadfolder>
+								<maxitems>1</maxitems>
+								<size>1</size>
+								<selectedListStyle>Width:180px</selectedListStyle>
+							</config>
+							</TCEforms>
+					</template_file>
+				</el>
+			</ROOT>
+		</sDEF>  
+		
+
+	</sheets>
+</T3DataStructure>

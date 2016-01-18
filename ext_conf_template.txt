@@ -1,0 +1,2 @@
+# cat=basic; type=string; label= general extension upload path
+uploadPath = uploads/tx_chmandelbrot

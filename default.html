@@ -1,0 +1,211 @@
+<html>
+
+<h3>FORM</h3>
+<em>This is the form template</em>
+<!-- ###FORMTEMPL### begin -->
+<link rel="stylesheet" href="typo3conf/ext/ch_mandelbrot/res/crop-image/css/image-crop.css">
+<script type="text/javascript">
+/************************************************************************************************************
+	(C) www.dhtmlgoodies.com, April 2006
+	
+	This is a script from www.dhtmlgoodies.com. You will find this and a lot of other scripts at our website.	
+	
+	Terms of use:
+	You are free to use this script as long as the copyright message is kept intact. However, you may not
+	redistribute, sell or repost it without our permission.
+	
+	Thank you!
+	
+	www.dhtmlgoodies.com
+	Alf Magne Kalleland
+	
+	************************************************************************************************************/
+
+/* Variables you could modify */
+var crop_script_alwaysPreserveAspectRatio = 1; // Always preserve aspect ratio
+var crop_script_fixedRatio = 2; // Width relative to height 2 = ratio 2:1
+var crop_script_server_file = 'dummy.php';
+
+var cropToolBorderWidth = 1; // Width of dotted border around crop rectangle
+var smallSquareWidth = 7; // Size of small squares used to resize crop rectangle
+
+// Size of image shown in crop tool
+var crop_imageWidth = 320;
+var crop_imageHeight = 200;
+
+// Size of original image
+var crop_originalImageWidth = 320;
+var crop_originalImageHeight = 200;
+
+var crop_minimumPercent = 10; // Minimum percent - resize
+var crop_maximumPercent = 100; // Maximum percent -resize
+
+var crop_minimumWidthHeight = 15; // Minimum width and height of crop area
+
+var updateFormValuesAsYouDrag = true; // This variable indicates if form values should be updated as we drag. This process could make the script work a little bit slow. That's why this option is set as a variable.
+if(!document.all)updateFormValuesAsYouDrag = false; // Enable this feature only in IE
+/* Variables you could modify */
+
+
+function createRequestObject() {
+
+    var xmlHttp = false;
+    // Mozilla, Opera, Safari sowie Internet Explorer 7
+    if (typeof(XMLHttpRequest) != 'undefined') {
+        xmlHttp = new XMLHttpRequest();
+    }
+    if (!xmlHttp) {
+        // Internet Explorer 6 und älter
+        try {
+            xmlHttp  = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch(e) {
+            try {
+                xmlHttp  = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch(e) {
+                xmlHttp  = false;
+            }
+        }
+    }
+    return xmlHttp;
+}
+
+var http = createRequestObject();
+
+function sndReq() {
+
+    var action = 'render';
+    var startRe = document.getElementsByName("tx_chmandelbrot_pi1[startRe]")[0].value;
+    var startIm = document.getElementsByName("tx_chmandelbrot_pi1[startIm]")[0].value;
+    var endeRe = document.getElementsByName("tx_chmandelbrot_pi1[endeRe]")[0].value;
+    var endeIm = document.getElementsByName("tx_chmandelbrot_pi1[endeIm]")[0].value;
+    var preset = document.getElementsByName("tx_chmandelbrot_pi1[preset]")[0].selectedIndex;
+    var color = document.getElementsByName("tx_chmandelbrot_pi1[color]")[0].selectedIndex;
+    var stepsRe = document.getElementsByName("tx_chmandelbrot_pi1[stepsRe]")[0].value;
+    var stepsIm = document.getElementsByName("tx_chmandelbrot_pi1[stepsIm]")[0].value;
+    
+    if (http) {
+        http.open('GET', '###SNDREQ###&cmd='
+                        +action
+                        +'&startRe='+startRe
+                        +'&startIm='+startIm
+                        +'&endeRe='+endeRe
+                        +'&endeIm='+endeIm
+                        +'&preset='+preset
+                        +'&color='+color
+                        +'&stepsRe='+stepsRe
+                        +'&stepsIm='+stepsIm
+                        +'&eID=ch_mandelbrot',
+                        true);
+        http.onreadystatechange = handleResponse;
+        http.send(null);
+    }
+}
+
+function zoom(action){
+
+    var input_crop_x = document.getElementById("input_crop_x").value;
+    var input_crop_y = document.getElementById("input_crop_y").value;
+    var input_crop_width = document.getElementById("input_crop_width").value;
+    var input_crop_height = document.getElementById("input_crop_height").value;
+    
+    var startRe = document.getElementsByName("tx_chmandelbrot_pi1[startRe]")[0].value;
+    var startIm = document.getElementsByName("tx_chmandelbrot_pi1[startIm]")[0].value;
+    var endeRe = document.getElementsByName("tx_chmandelbrot_pi1[endeRe]")[0].value;
+    var endeIm = document.getElementsByName("tx_chmandelbrot_pi1[endeIm]")[0].value;
+    var color = document.getElementsByName("tx_chmandelbrot_pi1[color]")[0].selectedIndex;
+    var stepsRe = document.getElementsByName("tx_chmandelbrot_pi1[stepsRe]")[0].value;
+    var stepsIm = document.getElementsByName("tx_chmandelbrot_pi1[stepsIm]")[0].value;
+    
+    if (http) {
+        http.open('GET', '###SNDREQ###&cmd='
+                        +action
+                        +'&startRe='+startRe
+                        +'&startIm='+startIm
+                        +'&endeRe='+endeRe
+                        +'&endeIm='+endeIm
+                        +'&input_crop_x='+input_crop_x
+                        +'&input_crop_y='+input_crop_y
+                        +'&input_crop_width='+input_crop_width
+                        +'&input_crop_height='+input_crop_height
+                        +'&color='+color
+                        +'&stepsRe='+stepsRe
+                        +'&stepsIm='+stepsIm
+                        +'&eID=ch_mandelbrot'
+                        ,true);                        
+        http.onreadystatechange = handleResponse;
+        http.send(null);
+    }
+}
+
+function handleResponse() {
+    if(http.readyState == 4){
+        var response = http.responseText;            
+        var update = new Array();        
+     
+        if(response.indexOf('|' != -1)) {
+            update = response.split('|');
+            document.getElementById("input_image_ref").value = update[0];
+            document.getElementById("imageContainer").innerHTML = '<img src="###TYPO3SITEURL###'+update[0]+'" onClick="getDetails(\'mouseLeft\');">';
+            document.getElementsByName("tx_chmandelbrot_pi1[startRe]")[0].value = update[1];
+            document.getElementsByName("tx_chmandelbrot_pi1[startIm]")[0].value = update[2];
+            document.getElementsByName("tx_chmandelbrot_pi1[endeRe]")[0].value = update[3];
+            document.getElementsByName("tx_chmandelbrot_pi1[endeIm]")[0].value = update[4];
+            document.getElementsByName("tx_chmandelbrot_pi1[stepsRe]")[0].value = update[5];
+            document.getElementsByName("tx_chmandelbrot_pi1[stepsIm]")[0].value = update[6];
+            
+            init_imageCrop();       
+        }        
+    }
+}
+</script>
+<script type="text/javascript" src="typo3conf/ext/ch_mandelbrot/res/crop-image/js/image-crop.js"></script>
+
+<form name="tx_chmandelbrot_pi1" action="###FORM###" method="post">
+<table>
+    <tr><td>Beispiele</td><td><select name="tx_chmandelbrot_pi1[preset]">
+                                                            <option value="0">Benutzerdefiniert</option>
+                                                            <option value="1">Mandelbrot</option>
+                                                            <option value="2">Beispiel #1</option>
+                                                            <option value="3">Beispiel #2</option>
+							    <option value="4">Beispiel #3</option>
+
+                            </select>
+    <td></tr>       
+</table>
+
+<table>
+    <tr><td>Farbverlauf</td><td><select name="tx_chmandelbrot_pi1[color]">
+                                                            <option value="0">Blue</option>
+                                                            <option value="1">Orange</option>
+                                                            <option value="2">Red</option>
+                                                            <option value="3">Yellow</option>
+                                                            <option value="4">Green</option>
+                                                            <option value="5">Brown</option>
+                                                            <option value="6">Black</option>
+                            </select>
+    <td></tr>       
+</table>
+
+<table>
+    <tr><td>Start Re</td><td><input type="text" name="tx_chmandelbrot_pi1[startRe]" value="###STARTRE###"></td></tr>
+    <tr><td>Start Im</td><td><input type="text" name="tx_chmandelbrot_pi1[startIm]" value="###STARTIM###"></td></tr>
+    <tr><td>Ende Re</td><td><input type="text" name="tx_chmandelbrot_pi1[endeRe]" value="###ENDERE###"></td></tr>
+    <tr><td>Ende Im</td><td><input type="text" name="tx_chmandelbrot_pi1[endeIm]" value="###ENDEIM###"></td></tr>
+    <tr><td colspace="2"><input type="button" name="submit" value="submit" onClick="sndReq()";></td></tr>
+</table>
+<div id="imageContainer"><img src="typo3conf/ext/ch_mandelbrot/res/mandelbrot/image/Daniela_Cicarelli.jpg" title="Daniela Cicarelli" alt="Daniela Cicarelli"></div>
+<input type="hidden" id="input_image_ref" value="">
+<input type="hidden" id="input_crop_x" value="0">
+<input type="hidden" id="input_crop_y" value="0">
+<input type="hidden" id="input_crop_width" value="320">
+<input type="hidden" id="input_crop_height" value="200">
+<input type="hidden" id="crop_percent_size" value="100">
+<input type="hidden" name="tx_chmandelbrot_pi1[stepsRe]" value="###STEPSRE###">
+<input type="hidden" name="tx_chmandelbrot_pi1[stepsIm]" value="###STEPSIM###">
+<table>
+    <tr><td><input type="button" name="zoomIn" value="Zoom In" onClick="zoom('zoomIn')";></td></tr>
+    <tr><td><input type="button" name="zoomQut" value="Zoom Out" onClick="zoom('zoomOut')";></td></tr>
+</table>
+</form>
+<!-- ###FORMTEMPL### end -->
+</html>
